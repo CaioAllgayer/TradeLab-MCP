@@ -260,6 +260,91 @@ def validate_tester_ini(config: str, source: Optional[str] = None) -> dict:
 
 
 @mcp.tool()
+def ea_capabilities() -> dict:
+    """Show TradeLab EA capabilities, defaults, and the mandatory pre-generation workflow."""
+    from .ea_standard import capabilities_summary
+
+    return capabilities_summary()
+
+
+@mcp.tool()
+def ea_registry(query: Optional[str] = None, refresh_if_stale: bool = True) -> dict:
+    """Query the compact EA catalog without loading every .mq5 source into the AI context."""
+    from .ea_registry import find_strategy, load_registry
+
+    catalog = load_registry(refresh_if_stale=refresh_if_stale)
+    if query:
+        return find_strategy(query, catalog)
+    return {
+        "schema_version": catalog["schema_version"],
+        "generated_at": catalog["generated_at"],
+        "count": catalog["count"],
+        "strategies": [
+            {
+                key: item.get(key)
+                for key in (
+                    "name", "path", "setup", "description", "execution_timeframe",
+                    "signal_timeframes", "bar_indices", "trade_mode", "standard_status",
+                    "sha256",
+                )
+            }
+            for item in catalog["strategies"]
+        ],
+    }
+
+
+@mcp.tool()
+def refresh_ea_registry() -> dict:
+    """Rebuild experts/registry.json and REGISTRY.md after an EA source changes."""
+    from .ea_registry import refresh_registry
+
+    return refresh_registry()
+
+
+@mcp.tool()
+def validate_ea_standard(source: str) -> dict:
+    """Check that an EA uses the guarded TradeLab stop, sizing, metadata, and bar helpers."""
+    from .ea_standard import validate_ea_source
+
+    return validate_ea_source(source)
+
+
+@mcp.tool()
+def plan_ea_creation(
+    setup: str,
+    execution_timeframe: Optional[str] = None,
+    signal_timeframe: Optional[str] = None,
+    signal_bar: Optional[int] = None,
+    higher_timeframe: Optional[str] = None,
+    higher_timeframe_bar: Optional[int] = None,
+    trade_mode: Optional[str] = None,
+    exit_rule: Optional[str] = None,
+    time_stop: Optional[str] = None,
+    original_stop: Optional[str] = None,
+    filters: Optional[list[str]] = None,
+) -> dict:
+    """Mandatory registry lookup and decision record before generating or modifying an EA."""
+    from .ea_registry import find_strategy, load_registry
+    from .ea_standard import build_creation_plan
+
+    match = find_strategy(setup, load_registry(refresh_if_stale=True))
+    return build_creation_plan(
+        setup,
+        match,
+        execution_timeframe=execution_timeframe,
+        signal_timeframe=signal_timeframe,
+        signal_bar=signal_bar,
+        higher_timeframe=higher_timeframe,
+        higher_timeframe_bar=higher_timeframe_bar,
+        trade_mode=trade_mode,
+        exit_rule=exit_rule,
+        time_stop=time_stop,
+        original_stop=original_stop,
+        filters=filters,
+    )
+
+
+@mcp.tool()
 def select_terminal(
     origin: Optional[str] = None,
     hash: Optional[str] = None,

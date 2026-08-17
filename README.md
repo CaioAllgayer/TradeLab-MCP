@@ -47,6 +47,11 @@ runs/20260817_073412_a8f231/
 | `compare_runs` | Diff de métricas entre runs |
 | `walk_forward` | Janelas IS/OOS, cada uma um backtest oficial |
 | `smoke_test` | Compile + tester curto (símbolo/período/modelo/data configuráveis) |
+| `ea_capabilities` | Menu compacto de capacidades e defaults para EAs |
+| `ea_registry` | Consulta estratégia equivalente/semelhante sem carregar todos os fontes |
+| `plan_ea_creation` | Fluxo obrigatório de decisões antes de gerar ou alterar EA |
+| `validate_ea_standard` | Validação estrutural do padrão TradeLab |
+| `refresh_ea_registry` | Atualiza catálogo estruturado, hashes e resumo humano |
 
 ## Instalação
 
@@ -119,7 +124,10 @@ No Strategy Tester o expert aparece como `TradeLab MCP\RSI2`. A pasta é sempre 
 
 O fonte no git continua em `experts/`. O MCP copia fonte + `.ex5` + includes locais para a pasta do terminal.
 
-O EA-base do laboratório (CTrade, `ArraySetAsSeries`, uma posição) ainda não foi padronizado — entra depois, com calma.
+O padrão para novos EAs está formalizado no include e no template compartilhados:
+
+- [TradeLab EA Standard](docs/TRADELAB_EA_STANDARD.md) — documentação completa e migração
+- [Contexto compacto para agentes](docs/TRADELAB_EA_AGENT.md) — regras essenciais de geração
 
 ## EA de aceitação
 

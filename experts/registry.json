@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-17T19:43:15.158011+00:00",
+  "experts_root": "C:\\Users\\caioa\\TradeLab-MCP\\experts",
+  "count": 2,
+  "strategies": [
+    {
+      "name": "RSI2",
+      "path": "RSI2.mq5",
+      "setup": "RSI(2) mean reversion",
+      "description": "Compra RSI(2) abaixo do limite, com filtro close > close[N], saída por RSI ou time stop.",
+      "execution_timeframe": "CURRENT",
+      "signal_timeframes": [
+        "CURRENT"
+      ],
+      "bar_indices": [
+        0,
+        1
+      ],
+      "entry": "Long quando RSI(2)[0] < InpRSIBuy e close[1] > close[1+InpTrendPeriod]",
+      "exit": "RSI(2)[0] > InpRSIExit ou InpMaxBars",
+      "stop": "ATR configurável; implementação legada pode usar [0] quando [1] falha",
+      "take_profit": false,
+      "trailing": false,
+      "time_stop": "InpMaxBars (default 9)",
+      "position_sizing": "Legado: tick value até o stop; lote fixo opcional",
+      "risk_pct_default": 1.0,
+      "trade_mode": "SWING",
+      "filters": [
+        "close > close[N]"
+      ],
+      "indicators": [
+        "RSI",
+        "ATR"
+      ],
+      "parameters": [
+        "InpRSIPeriod",
+        "InpRSIBuy",
+        "InpRSIExit",
+        "InpAtrPeriod",
+        "InpAtrMult",
+        "InpMaxBars",
+        "InpTrendPeriod",
+        "InpRiskPct",
+        "InpLots",
+        "InpMagic",
+        "InpResearchRunId"
+      ],
+      "magic_number": 20260817,
+      "direction": [
+        "long"
+      ],
+      "variant_of": "RSI(2) original",
+      "version": "1.30",
+      "standard_status": "legacy",
+      "last_modified": "2026-08-17T15:40:17.914925+00:00",
+      "compile_status": "binary_present",
+      "sha256": "daeabcb183d2d297b5ac25f0d3cf27c43fb61a5531838d75d2f995105576ea44",
+      "logical_signature": {
+        "tokens": [
+          "atr",
+          "close",
+          "inpmaxbars",
+          "inprsibuy",
+          "inprsiexit",
+          "inptrendperiod",
+          "long",
+          "mean",
+          "ou",
+          "quando",
+          "reversion",
+          "rsi"
+        ],
+        "execution_timeframe": "CURRENT",
+        "signal_timeframes": [
+          "CURRENT"
+        ],
+        "bar_indices": [
+          0,
+          1
+        ],
+        "trade_mode": "SWING"
+      }
+    },
+    {
+      "name": "RubberbandAltucher",
+      "path": "RubberbandAltucher.mq5",
+      "setup": "Altucher Rubber Band",
+      "description": "Mean reversion por Bollinger %b, com SMA opcional, saídas por banda/%b e time stop.",
+      "execution_timeframe": "CURRENT",
+      "signal_timeframes": [
+        "CURRENT"
+      ],
+      "bar_indices": [
+        1
+      ],
+      "entry": "Long em nova barra quando %b[1] <= InpPctBEntry; SMA de tendência opcional",
+      "exit": "Banda média, banda superior ou alvo %b; InpMaxBars opcional",
+      "stop": "ATR configurável; pode ser desativado na implementação legada",
+      "take_profit": false,
+      "trailing": false,
+      "time_stop": "InpMaxBars (default 5)",
+      "position_sizing": "Legado: tick value com fallbacks não padronizados",
+      "risk_pct_default": 1.5,
+      "trade_mode": "SWING",
+      "filters": [
+        "SMA de tendência opcional"
+      ],
+      "indicators": [
+        "Bollinger Bands",
+        "Moving Average",
+        "ATR"
+      ],
+      "parameters": [
+        "InpBBPeriod",
+        "InpBBDev",
+        "InpPctBEntry",
+        "InpUseTrendFilter",
+        "InpTrendPeriod",
+        "InpExitMode",
+        "InpExitPctB",
+        "InpMaxBars",
+        "InpAtrPeriod",
+        "InpAtrMult",
+        "InpRiskPct",
+        "InpLots",
+        "InpMagic",
+        "InpResearchRunId"
+      ],
+      "magic_number": 20260818,
+      "direction": [
+        "long"
+      ],
+      "variant_of": "Altucher Rubber Band original",
+      "version": "1.00",
+      "standard_status": "legacy",
+      "last_modified": "2026-08-17T19:37:37.429634+00:00",
+      "compile_status": "binary_present",
+      "sha256": "7345b75f84aa6fb06c5295bc9b879c499c23c7c3541bfb281127064f057c7f2f",
+      "logical_signature": {
+        "tokens": [
+          "altucher",
+          "alvo",
+          "atr",
+          "banda",
+          "barra",
+          "bollinger",
+          "inpmaxbars",
+          "inppctbentry",
+          "long",
+          "ma",
+          "nova",
+          "opcional",
+          "ou",
+          "quando",
+          "rubberband",
+          "sma",
+          "superior",
+          "tendencia"
+        ],
+        "execution_timeframe": "CURRENT",
+        "signal_timeframes": [
+          "CURRENT"
+        ],
+        "bar_indices": [
+          1
+        ],
+        "trade_mode": "SWING"
+      }
+    }
+  ]
+}

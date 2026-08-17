@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "strategies": {
+    "RSI2.mq5": {
+      "name": "RSI2",
+      "setup": "RSI(2) mean reversion",
+      "description": "Compra RSI(2) abaixo do limite, com filtro close > close[N], saída por RSI ou time stop.",
+      "execution_timeframe": "CURRENT",
+      "signal_timeframes": ["CURRENT"],
+      "bar_indices": [0, 1],
+      "entry": "Long quando RSI(2)[0] < InpRSIBuy e close[1] > close[1+InpTrendPeriod]",
+      "exit": "RSI(2)[0] > InpRSIExit ou InpMaxBars",
+      "stop": "ATR configurável; implementação legada pode usar [0] quando [1] falha",
+      "take_profit": false,
+      "trailing": false,
+      "time_stop": "InpMaxBars (default 9)",
+      "position_sizing": "Legado: tick value até o stop; lote fixo opcional",
+      "risk_pct_default": 1.0,
+      "trade_mode": "SWING",
+      "filters": ["close > close[N]"],
+      "indicators": ["RSI", "ATR"],
+      "direction": ["long"],
+      "variant_of": "RSI(2) original",
+      "standard_status": "legacy"
+    },
+    "RubberbandAltucher.mq5": {
+      "name": "RubberbandAltucher",
+      "setup": "Altucher Rubber Band",
+      "description": "Mean reversion por Bollinger %b, com SMA opcional, saídas por banda/%b e time stop.",
+      "execution_timeframe": "CURRENT",
+      "signal_timeframes": ["CURRENT"],
+      "bar_indices": [1],
+      "entry": "Long em nova barra quando %b[1] <= InpPctBEntry; SMA de tendência opcional",
+      "exit": "Banda média, banda superior ou alvo %b; InpMaxBars opcional",
+      "stop": "ATR configurável; pode ser desativado na implementação legada",
+      "take_profit": false,
+      "trailing": false,
+      "time_stop": "InpMaxBars (default 5)",
+      "position_sizing": "Legado: tick value com fallbacks não padronizados",
+      "risk_pct_default": 1.5,
+      "trade_mode": "SWING",
+      "filters": ["SMA de tendência opcional"],
+      "indicators": ["Bollinger Bands", "Moving Average", "ATR"],
+      "direction": ["long"],
+      "variant_of": "Altucher Rubber Band original",
+      "standard_status": "legacy"
+    }
+  }
+}
