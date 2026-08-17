@@ -121,6 +121,7 @@ def write_tester_ini(
     inputs: dict[str, object] | None = None,
     optimization: int = 0,
     visual: int = 0,
+    shutdown_terminal: int = 0,
 ) -> Path:
     """Write a run-exclusive tester.ini. Never patches a shared global file."""
     dest = Path(path)
@@ -148,7 +149,7 @@ def write_tester_ini(
         f"Leverage={leverage_s}",
         "ExecutionMode=0",
         f"Visual={int(visual)}",
-        "ShutdownTerminal=1",
+        f"ShutdownTerminal={1 if int(shutdown_terminal) else 0}",
         "ReplaceReport=1",
         f"Report={report}",
         "",

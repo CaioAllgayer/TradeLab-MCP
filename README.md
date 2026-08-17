@@ -103,6 +103,8 @@ O agente chama `run_backtest(strategy="experts/RSI2.mq5", symbol="PETR4", timefr
 
 ## Onde os EAs vivem no MT5
 
+O terminal **fica aberto** entre testes. O MCP não usa mais `ShutdownTerminal=1`: cada run espera o `report.htm` daquele `run_id`. Só feche o MT5 se o `/config` for ignorado (instância travada).
+
 Todo EA de teste automático é publicado em:
 
 ```text

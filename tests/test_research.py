@@ -14,7 +14,7 @@ from mcp_mt5.research.ids import is_run_id, new_experiment_id, new_run_id
 from mcp_mt5.research.lab import publish_to_lab
 from mcp_mt5.research.lock import InstallLock, LockBusy
 from mcp_mt5.research.manifest import new_manifest, read_manifest, update_manifest, write_manifest
-from mcp_mt5.research.runner import execute_backtest, get_run, get_trades
+from mcp_mt5.research.runner import execute_backtest, get_run, get_trades, wait_for_report
 from mcp_mt5.research.snapshot import snapshot_strategy
 from mcp_mt5.research.store import ResearchStore
 from mcp_mt5.research.tester_ini import format_leverage, normalize_date, normalize_model, write_tester_ini
@@ -75,7 +75,7 @@ def test_tester_ini_exclusive_and_leverage(tmp_path: Path):
     assert "Model=4" in text
     assert "FromDate=2015.01.01" in text
     assert "Leverage=1:100" in text
-    assert "ShutdownTerminal=1" in text
+    assert "ShutdownTerminal=0" in text
     assert "ReplaceReport=1" in text
     assert "InpRSIBuy=10||10||0||10||N" in text
     assert format_leverage("1:100") == "1:100"
@@ -234,6 +234,15 @@ def test_compare_runs(tmp_path: Path):
     out = compare_runs(store, [a, b])
     profit = next(d for d in out["diffs"] if d["key"] == "net_profit")
     assert profit["deltas_vs_baseline"][b]["delta"] == 50.0
+
+
+def test_wait_for_report_stable(tmp_path: Path):
+    folder = tmp_path / "rep"
+    folder.mkdir()
+    (folder / "report.htm").write_text("<html>" + "x" * 300 + "</html>", encoding="utf-8")
+    found = wait_for_report(folder, timeout_sec=3, poll=0.05)
+    assert found is not None
+    assert found.name.startswith("report")
 
 
 def test_publish_to_lab_experts(tmp_path: Path):

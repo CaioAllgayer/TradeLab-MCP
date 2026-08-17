@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from typing import Any, Callable
 
@@ -43,18 +44,42 @@ def launch_terminal(
     timeout_sec: int = 1800,
     portable: bool = False,
 ) -> dict:
+    """Hand the tester.ini to terminal64. Does not wait or kill the process.
+
+    If a terminal is already open, MT5 reuses it. Completion is the exclusive
+    report file for this run_id, not process exit.
+    """
+    del timeout_sec
     cmd = [str(layout.terminal), f"/config:{config}"]
     if portable:
         cmd.append("/portable")
-    try:
-        proc = subprocess.run(cmd, timeout=timeout_sec)
-        return {"returncode": proc.returncode, "timeout": False, "cmd": cmd}
-    except subprocess.TimeoutExpired:
-        try:
-            subprocess.run(["taskkill", "/F", "/IM", layout.terminal.name], capture_output=True, text=True)
-        except Exception:
-            pass
-        return {"returncode": -1, "timeout": True, "cmd": cmd}
+    if os.name == "nt":
+        flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+        subprocess.Popen(cmd, close_fds=False, creationflags=flags)
+    else:
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    return {"returncode": None, "timeout": False, "cmd": cmd, "detached": True}
+
+
+def wait_for_report(report_dir: str | Path, timeout_sec: int = 1800, poll: float = 0.5) -> Path | None:
+    """Wait until the run-specific report exists and its size is stable."""
+    folder = Path(report_dir)
+    deadline = time.time() + max(timeout_sec, 1)
+    last_size = -1
+    stable = 0
+    while time.time() < deadline:
+        found = _find_report(folder)
+        if found and found.stat().st_size > 200:
+            size = found.stat().st_size
+            if size == last_size:
+                stable += 1
+                if stable >= 3:
+                    return found
+            else:
+                stable = 0
+                last_size = size
+        time.sleep(poll)
+    return None
 
 
 def _snapshot_logs(folder: Path) -> dict[str, tuple[int, float]]:
@@ -302,6 +327,7 @@ def execute_backtest(
             leverage=leverage,
             report=report_key,
             inputs=ini_inputs,
+            shutdown_terminal=0,
         )
         update_manifest(
             store,
@@ -316,19 +342,16 @@ def execute_backtest(
         launched = launcher(layout, ini_path, timeout_sec, portable)
         return_code = launched.get("returncode")
 
+        report_src = wait_for_report(tester_abs, timeout_sec=timeout_sec)
         _collect_tester_log(layout.tester_logs, log_before, run_dir / "tester.log")
 
-        if launched.get("timeout"):
-            return _fail(store, rid, "timeout", f"terminal timeout after {timeout_sec}s", return_code)
-
-        report_src = _find_report(tester_abs)
-        if report_src is None:
+        if launched.get("timeout") or report_src is None:
             found = [p.name for p in tester_abs.iterdir()] if tester_abs.exists() else []
             return _fail(
                 store,
                 rid,
-                "report",
-                f"no report in {tester_abs} (found: {found or 'empty'})",
+                "timeout",
+                f"tester report not ready after {timeout_sec}s in {tester_abs} (found: {found or 'empty'})",
                 return_code,
             )
         report_dest = run_dir / "report.htm"
