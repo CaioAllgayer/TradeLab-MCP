@@ -17,7 +17,11 @@ venv/
 *.ex4
 .mt5tmp/
 research/runs/
-research/experiments/
+research/experiments/*
+!research/experiments/b3_rsi2_universe/
+research/experiments/b3_rsi2_universe/*
+!research/experiments/b3_rsi2_universe/ranking.csv
+!research/experiments/b3_rsi2_universe/SUMMARY.md
 research/research.db
 research/*.db
 mt5.lock
