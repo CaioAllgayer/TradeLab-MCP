@@ -1,0 +1,119 @@
+{
+  "run_id": "20260817_085141_dd59db",
+  "status": "completed",
+  "symbol": "BBAS3",
+  "period": "D1",
+  "model": "1min_ohlc",
+  "metrics": {
+    "net_profit": 455.0,
+    "gross_profit": 527.0,
+    "gross_loss": -72.0,
+    "profit_factor": 7.32,
+    "expected_payoff": 35.0,
+    "recovery_factor": 3.55,
+    "sharpe": 2.15,
+    "total_trades": 13,
+    "balance_drawdown": 54.0,
+    "equity_drawdown": 128.0,
+    "initial_deposit": 10000.0,
+    "symbol": "Tipo",
+    "period": "Daily (2024.01.01 - 2024.08.16)",
+    "expert": "RSI2",
+    "win_rate": 44.4444
+  },
+  "artifacts": {
+    "tester.ini": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\tester.ini",
+    "strategy.mq5": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\strategy.mq5",
+    "strategy.ex5": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\strategy.ex5",
+    "report.htm": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\report.htm",
+    "tester.log": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\tester.log",
+    "trades.csv": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\trades.csv",
+    "metrics.json": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\metrics.json",
+    "manifest.json": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\manifest.json",
+    "compile.log": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db\\compile.log",
+    "error.json": null
+  },
+  "manifest": {
+    "run_id": "20260817_085141_dd59db",
+    "status": "completed",
+    "stage": "completed",
+    "strategy": {
+      "name": "RSI2",
+      "source_sha256": "6290bc3ee8f326ea2d119ccd9a1ca39a52f72d91affeb4cc193afc14e381e61c",
+      "binary_sha256": "22bc66e900895ae1c1d435c5eae6c15b6fad8c872cc680f041c832490fdadca2",
+      "includes": [
+        {
+          "src": "C:\\Users\\caioa\\TradeLab-MCP\\experts\\Include\\ResearchExport.mqh",
+          "sha256": "cc95c7e10d4a5e0121c06ce848665dac695a95e2d5fc8ee35974c20821a32857",
+          "snap": "Include\\ResearchExport.mqh"
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Trade\\Trade.mqh",
+          "sha256": "96e6781624534377fe7971cba52cca3d62d1b030bc10d5e4ebf3ed8c541399ed",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Trade\\OrderInfo.mqh",
+          "sha256": "d0e479578ef91d2ef1b07ae63d28ae54e15cebb914dd10e5d4510c269a9ca999",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Object.mqh",
+          "sha256": "dfad4fdb6d1bf47cf43fcbc2882e52979459f17a776f75f250a7c32d0623ab35",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\StdLibErr.mqh",
+          "sha256": "04bb2c47b1b04dceb052e6dba1f85e0330c53abc602f341e2ea95ea1498ab28b",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Trade\\HistoryOrderInfo.mqh",
+          "sha256": "e88f6be450462a045470315887ef751a4510da65a5115325dc88542743fc52f8",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Trade\\PositionInfo.mqh",
+          "sha256": "dd720b755c7f23dcc109fc81bcf0772b907411d545e4a1117421737bb9ff6897",
+          "snap": null
+        },
+        {
+          "src": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Include\\Trade\\DealInfo.mqh",
+          "sha256": "9d6fb4e7d8754eaee761e43943dc49cdc3a32793ee8438119d939ea7bad71880",
+          "snap": null
+        }
+      ],
+      "lab_expert": "TradeLab MCP\\RSI2",
+      "lab_dir": "C:\\Users\\caioa\\AppData\\Roaming\\MetaQuotes\\Terminal\\D0E8209F77C8CF37AD8BF550E51FF075\\MQL5\\Experts\\TradeLab MCP"
+    },
+    "test": {
+      "symbol": "BBAS3",
+      "period": "D1",
+      "from": "2024.01.01",
+      "to": "2024.08.16",
+      "model": 1,
+      "model_name": "1min_ohlc",
+      "deposit": 10000.0,
+      "currency": "BRL",
+      "leverage": "1:100"
+    },
+    "environment": {
+      "terminal_build": "5.0.0.6116",
+      "terminal_hash": "D0E8209F77C8CF37AD8BF550E51FF075",
+      "terminal_sha256": "90151af6ed2d8a9a7aff34f5962908b6e287226c00e69cc89911fcb6ec2a6d67",
+      "broker_server": "GenialInvestimentos-PRD",
+      "mt5_install": "C:\\Program Files\\MetaTrader 5"
+    },
+    "files": {
+      "config_sha256": "5b5d007a5171aaca768829d8b48b9fc67f884d4141c72a56c24f71274cad570e",
+      "report": "report.htm",
+      "trades": "trades.csv",
+      "tester_log": "tester.log"
+    },
+    "error": null,
+    "return_code": 0,
+    "started_at": "2026-08-17T11:51:41.984528+00:00",
+    "finished_at": "2026-08-17T11:51:59.793871+00:00",
+    "run_dir": "C:\\Users\\caioa\\TradeLab-MCP\\research\\runs\\20260817_085141_dd59db"
+  }
+}

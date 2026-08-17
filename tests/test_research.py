@@ -172,6 +172,19 @@ def test_parse_tester_report_portuguese():
     assert s["total_trades"] == 10
 
 
+def test_parse_tester_report_negociacoes_label():
+    html = """<html><body><table>
+    <tr><td>Total de Negociações:</td><td>13</td></tr>
+    <tr><td>Lucro Líquido Total:</td><td>455.00</td></tr>
+    <tr><td>Rebaixamento Máximo do Saldo :</td><td>54.00 (0.52%)</td></tr>
+    </table></body></html>"""
+    s = parse_tester_report(html)["summary"]
+    assert s["total_trades"] == 13
+    assert s["net_profit"] == 455.0
+    assert s["balance_drawdown"] == 54.0
+    assert s["balance_drawdown_pct"] == 0.52
+
+
 def test_sqlite_index(tmp_path: Path):
     db = tmp_path / "research.db"
     manifest = {
