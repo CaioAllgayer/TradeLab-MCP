@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "tradelab": {
+      "command": "tradelab-mcp",
+      "env": {
+        "MT5_INSTALL": "C:\\Program Files\\MetaTrader 5",
+        "TRADE_LAB_ROOT": "C:\\Users\\caioa\\TradeLab-MCP\\research"
+      }
+    }
+  }
+}

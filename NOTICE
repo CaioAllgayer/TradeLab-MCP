@@ -1,0 +1,18 @@
+TradeLab-MCP is a research-oriented fork of PHUICMT/mcp-mt5 (MIT).
+
+Upstream: https://github.com/PHUICMT/mcp-mt5
+
+The original project provides the MetaTrader CLI harness (MetaEditor compile,
+terminal launch, include resolution, tester.ini helpers, and parsers).
+
+This fork adds a deterministic research layer:
+
+- unique run_id per backtest
+- exclusive run directory and tester.ini
+- explicit report association (never "latest file")
+- research manifest and SHA-256 provenance
+- SQLite index
+- MCP tools for batch, compare, and walk-forward
+
+The official MetaTrader 5 Strategy Tester remains the only execution engine.
+Python never simulates fills, spread, stops, or P&L.
