@@ -101,6 +101,24 @@ O agente chama `run_backtest(strategy="experts/RSI2.mq5", symbol="PETR4", timefr
 
 `get_run("20260817_073412_a8f231")` devolve exatamente aquele experimento.
 
+## Onde os EAs vivem no MT5
+
+Todo EA de teste automático é publicado em:
+
+```text
+<MQL5>\Experts\TradeLab MCP\
+```
+
+Neste PC isso resolve para:
+
+`C:\Users\caioa\AppData\Roaming\MetaQuotes\Terminal\D0E8209F77C8CF37AD8BF550E51FF075\MQL5\Experts\TradeLab MCP`
+
+No Strategy Tester o expert aparece como `TradeLab MCP\RSI2`. A pasta é sempre relativa ao terminal ativo (`layout.experts_dir`), não a um hash fixo.
+
+O fonte no git continua em `experts/`. O MCP copia fonte + `.ex5` + includes locais para a pasta do terminal.
+
+O EA-base do laboratório (CTrade, `ArraySetAsSeries`, uma posição) ainda não foi padronizado — entra depois, com calma.
+
 ## EA de aceitação
 
 `experts/RSI2.mq5`

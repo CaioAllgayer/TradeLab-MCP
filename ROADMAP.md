@@ -1,5 +1,15 @@
 # Roadmap
 
+## EA-base do laboratório
+
+Ainda não implementado. Quando formos lá, o alvo é um EA simples e robusto:
+
+- `CTrade` (sem OrderSend legado)
+- `ArraySetAsSeries`
+- uma posição
+- sem simular fill/spread/P&L
+- publicado em `Experts\TradeLab MCP`
+
 ## Fase 1 — Motor confiável (esta milestone)
 
 - [x] Fork de PHUICMT/mcp-mt5

@@ -6,6 +6,8 @@ Fork of PHUICMT/mcp-mt5 0.4.1 with a deterministic research layer.
 
 ### Added
 
+- Automatic/test EAs are always published to `MQL5\\Experts\\TradeLab MCP` on the active terminal
+
 - Unique `run_id` and exclusive `runs/<run_id>/` artifact directory
 - Exclusive `tester.ini` per execution (never a shared global file)
 - Research `manifest.json` + SHA-256 of source, binary, includes, and config

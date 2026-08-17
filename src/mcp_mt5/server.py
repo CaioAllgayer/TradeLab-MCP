@@ -18,6 +18,7 @@ from .research.batch import run_batch as _run_batch
 from .research.compare import compare_runs as _compare_runs
 from .research.compile import compile_source
 from .research.health import health_check
+from .research.lab import publish_to_lab
 from .research.runner import execute_backtest, get_run as _get_run, get_trades as _get_trades
 from .research.store import ResearchStore
 from .research.walk_forward import run_walk_forward as _run_walk_forward
@@ -88,11 +89,20 @@ def compile(
     include: Optional[str] = None,
     log_file: Optional[str] = None,
     timeout_sec: int = 300,
+    publish: bool = True,
 ) -> dict:
-    """Compile a .mq5/.mq4 source via MetaEditor. Returns hashes of source and binary."""
+    """Compile a .mq5/.mq4 source via MetaEditor and publish it to Experts/TradeLab MCP."""
     src = Path(source)
     log_path = Path(log_file) if log_file else (_workdir(src) / f"{src.stem}.compile.log" if src.exists() else None)
-    return compile_source(layout(), src, include=include, log_file=log_path, timeout_sec=timeout_sec)
+    result = compile_source(layout(), src, include=include, log_file=log_path, timeout_sec=timeout_sec)
+    if publish and result.get("success") and src.suffix.lower() in {".mq5", ".mq4"}:
+        result["published"] = publish_to_lab(
+            layout(),
+            name=src.stem,
+            source=src,
+            binary=result.get("binary"),
+        )
+    return result
 
 
 @mcp.tool()

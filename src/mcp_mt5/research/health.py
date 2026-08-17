@@ -7,6 +7,7 @@ from pathlib import Path
 
 from ..parsers import read_text_auto
 from ..paths import MT5Layout
+from .config import LAB_EXPERTS_SUBDIR, lab_experts_dir
 
 
 def file_sha256(path: Path) -> str | None:
@@ -132,6 +133,11 @@ def health_check(layout: MT5Layout) -> dict:
             "sha256": terminal_sha,
         },
         "experts": {"path": str(layout.experts_dir), "exists": layout.experts_dir.exists()},
+        "lab_experts": {
+            "subdir": LAB_EXPERTS_SUBDIR,
+            "path": str(lab_experts_dir(layout)),
+            "exists": lab_experts_dir(layout).exists(),
+        },
         "tester": {"path": str(layout.tester_dir), "exists": tester_ok},
         "mql_root": str(layout.mql_root),
         "include_dir": str(layout.include_dir),

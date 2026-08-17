@@ -11,6 +11,7 @@ from mcp_mt5.research.compare import compare_runs
 from mcp_mt5.research.db import connect, fetch_run, upsert_run
 from mcp_mt5.research.hashes import sha256_file, sha256_text
 from mcp_mt5.research.ids import is_run_id, new_experiment_id, new_run_id
+from mcp_mt5.research.lab import publish_to_lab
 from mcp_mt5.research.lock import InstallLock, LockBusy
 from mcp_mt5.research.manifest import new_manifest, read_manifest, update_manifest, write_manifest
 from mcp_mt5.research.runner import execute_backtest, get_run, get_trades
@@ -55,7 +56,7 @@ def test_tester_ini_exclusive_and_leverage(tmp_path: Path):
     path = tmp_path / "tester.ini"
     write_tester_ini(
         path,
-        expert=r"Research\abc",
+        expert=r"TradeLab MCP\abc",
         symbol="PETR4",
         period="D1",
         from_date="2015-01-01",
@@ -64,11 +65,11 @@ def test_tester_ini_exclusive_and_leverage(tmp_path: Path):
         deposit=100000,
         currency="BRL",
         leverage="1:100",
-        report=r"Tester\Research\abc\report",
+        report=r"Tester\TradeLab MCP\abc\report",
         inputs={"InpRSIBuy": 10},
     )
     text = path.read_text(encoding="utf-8")
-    assert "Expert=Research\\abc" in text
+    assert "Expert=TradeLab MCP\\abc" in text
     assert "Symbol=PETR4" in text
     assert "Period=D1" in text
     assert "Model=4" in text
@@ -222,6 +223,24 @@ def test_compare_runs(tmp_path: Path):
     assert profit["deltas_vs_baseline"][b]["delta"] == 50.0
 
 
+def test_publish_to_lab_experts(tmp_path: Path):
+    layout = _fake_layout(tmp_path)
+    src = tmp_path / "RSI2.mq5"
+    src.write_text('#include "Include/ResearchExport.mqh"\nvoid OnTick() {}\n', encoding="utf-8")
+    inc = tmp_path / "Include"
+    inc.mkdir()
+    (inc / "ResearchExport.mqh").write_text("// export\n", encoding="utf-8")
+    binary = tmp_path / "RSI2.ex5"
+    binary.write_bytes(b"EX5")
+    out = publish_to_lab(layout, name="RSI2", source=src, binary=binary)
+    lab = layout.experts_dir / "TradeLab MCP"
+    assert out["expert"] == r"TradeLab MCP\RSI2"
+    assert (lab / "RSI2.mq5").exists()
+    assert (lab / "RSI2.ex5").exists()
+    assert (lab / "Include" / "ResearchExport.mqh").exists()
+    assert (lab / "README.txt").exists()
+
+
 def test_snapshot_includes(tmp_path: Path):
     src_dir = tmp_path / "src"
     src_dir.mkdir()
@@ -273,7 +292,7 @@ def test_runner_associates_report_by_run_id(tmp_path: Path):
         for line in text.splitlines():
             if line.startswith("Report="):
                 report = line.split("=", 1)[1]
-        assert report and "Research" in report
+        assert report and "TradeLab MCP" in report
         report_dir = _layout.data / Path(report).parent
         report_dir.mkdir(parents=True, exist_ok=True)
         (report_dir / "report.htm").write_text(SAMPLE_REPORT, encoding="utf-8")
@@ -305,6 +324,9 @@ def test_runner_associates_report_by_run_id(tmp_path: Path):
     assert (store.run_dir(result["run_id"]) / "strategy.mq5").exists()
     assert (store.run_dir(result["run_id"]) / "strategy.ex5").exists()
     assert (store.run_dir(result["run_id"]) / "manifest.json").exists()
+    assert (layout.experts_dir / "TradeLab MCP" / "RSI2.ex5").exists()
+    ini_text = (store.run_dir(result["run_id"]) / "tester.ini").read_text(encoding="utf-8")
+    assert "Expert=TradeLab MCP\\RSI2" in ini_text
     manifest = json.loads((store.run_dir(result["run_id"]) / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["files"]["config_sha256"]
     assert manifest["strategy"]["source_sha256"]

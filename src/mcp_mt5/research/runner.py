@@ -12,10 +12,11 @@ from ..parsers import parse_tester_report, read_text_auto
 from ..paths import MT5Layout
 from . import db as research_db
 from .compile import compile_source
-from .config import research_root
+from .config import lab_expert_name, research_root
 from .hashes import sha256_file
 from .health import broker_server, file_sha256, win_file_version
 from .ids import new_run_id
+from .lab import publish_to_lab
 from .lock import InstallLock, lock_for_layout
 from .manifest import new_manifest, read_manifest, update_manifest, write_manifest
 from .metrics import normalize_metrics
@@ -266,12 +267,22 @@ def execute_backtest(
         binary_sha = compiled.get("binary_sha256") or sha256_file(binary)
         update_manifest(store, rid, strategy={"binary_sha256": binary_sha, "source_sha256": compiled.get("source_sha256") or snap["source_sha256"]})
 
-        expert_rel = f"Research\\{rid}"
-        dest_ea = layout.experts_dir / "Research" / f"{rid}.ex5"
-        dest_ea.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(binary, dest_ea)
+        extra = []
+        for item in snap.get("includes") or []:
+            rel = item.get("snap")
+            if not rel or item.get("std_include"):
+                continue
+            extra.append((run_dir / rel, rel))
+        published = publish_to_lab(
+            layout,
+            name=source.stem,
+            source=snapped,
+            binary=binary,
+            extra_files=extra,
+        )
+        expert_rel = published["expert"] or lab_expert_name(source.stem)
 
-        tester_rel = Path("Tester") / "Research" / rid
+        tester_rel = Path("Tester") / "TradeLab MCP" / rid
         tester_abs = layout.data / tester_rel
         tester_abs.mkdir(parents=True, exist_ok=True)
         report_key = str(tester_rel / "report")
@@ -292,7 +303,12 @@ def execute_backtest(
             report=report_key,
             inputs=ini_inputs,
         )
-        update_manifest(store, rid, files={"config_sha256": sha256_file(ini_path)})
+        update_manifest(
+            store,
+            rid,
+            files={"config_sha256": sha256_file(ini_path)},
+            strategy={"lab_expert": expert_rel, "lab_dir": published["dir"]},
+        )
 
         log_before = _snapshot_logs(layout.tester_logs)
         update_manifest(store, rid, status="running", stage="tester")

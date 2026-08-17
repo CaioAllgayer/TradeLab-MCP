@@ -40,3 +40,17 @@ def experiments_dir(root: str | Path | None = None) -> Path:
 
 def db_path(root: str | Path | None = None) -> Path:
     return research_root(root) / "research.db"
+
+
+# Always publish automatic/test EAs here, relative to the active terminal Experts/.
+# Example: %APPDATA%\MetaQuotes\Terminal\<hash>\MQL5\Experts\TradeLab MCP
+LAB_EXPERTS_SUBDIR = "TradeLab MCP"
+
+
+def lab_experts_dir(layout) -> Path:
+    return Path(layout.experts_dir) / LAB_EXPERTS_SUBDIR
+
+
+def lab_expert_name(strategy_name: str) -> str:
+    """Value for tester.ini Expert= (backslash, no extension)."""
+    return f"{LAB_EXPERTS_SUBDIR}\\{strategy_name}"
