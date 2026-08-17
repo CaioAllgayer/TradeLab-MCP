@@ -6,6 +6,8 @@ Fork of PHUICMT/mcp-mt5 0.4.1 with a deterministic research layer.
 
 ### Added
 
+- Stronger tester HTML parser: official PT win-rate, ignore table headers, pair Deals in/out
+
 - Automatic/test EAs are always published to `MQL5\\Experts\\TradeLab MCP` on the active terminal
 
 - Unique `run_id` and exclusive `runs/<run_id>/` artifact directory

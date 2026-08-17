@@ -38,3 +38,5 @@ MCP run: `20260817_085141_dd59db`
 Critério do guia: **iguais**.
 
 Os 13 fechamentos têm os mesmos preços e lucros (45, 79, 97, 71, -54, 49, 3, 25, 8, 38, 12, -18, 100).
+
+O parser agora lê o HTML oficial (não o “último arquivo”): ignora cabeçalho `Tipo`, pega win rate 84.62 do Tester e emparelha Transações `in`/`out`.

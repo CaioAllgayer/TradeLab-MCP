@@ -137,7 +137,18 @@ _LABEL_MAP = {
     "short trades (won %)": "short_trades_won_pct",
     "long trades (won %)": "long_trades_won_pct",
     "profit trades (% of total)": "profit_trades_pct",
+    "negociações com lucro (% of total)": "profit_trades_pct",
+    "negociacoes com lucro (% of total)": "profit_trades_pct",
     "loss trades (% of total)": "loss_trades_pct",
+    "negociações com perda (% of total)": "loss_trades_pct",
+    "negociacoes com perda (% of total)": "loss_trades_pct",
+    "moeda": "currency",
+    "currency": "currency",
+    "alavancagem": "leverage",
+    "leverage": "leverage",
+    "qualidade do histórico": "history_quality",
+    "qualidade do historico": "history_quality",
+    "history quality": "history_quality",
     "maximal drawdown": "max_drawdown",
     "rebaixamento máximo": "max_drawdown",
     "rebaixamento maximo": "max_drawdown",
@@ -179,7 +190,19 @@ _NUMERIC_SUMMARY = {
     "win_rate",
     "profit_trades",
     "loss_trades",
+    "history_quality",
 }
+
+_HEADER_WORDS = {
+    "tipo", "type", "volume", "preço", "preco", "price", "ordem", "order",
+    "horário", "horario", "horário da abertura", "horario da abertura",
+    "time", "estado", "comentário", "comentario", "comment",
+    "direção", "direcao", "direction", "oferta", "deal", "saldo", "balance",
+    "comissão", "comissao", "commission", "swap", "lucro", "profit",
+    "s / l", "t / p",
+}
+
+_TEXT_KEYS = {"symbol", "period", "expert", "currency", "leverage"}
 
 _MONEY_PCT_RE = re.compile(
     r"(?P<money>[-+]?\d[\d\s.\u00a0']*[,\.]?\d*)\s*\(\s*(?P<pct>[-+]?\d[\d\s.,]*)\s*%?\s*\)"
@@ -233,10 +256,31 @@ def _lookup_label(label: str) -> str | None:
     return _LABEL_MAP.get(_canon_label(label))
 
 
+def _is_header_row(row: list[str]) -> bool:
+    cells = [_canon_label(c) for c in row if c and c.strip()]
+    if len(cells) < 3:
+        return False
+    hits = sum(1 for c in cells if c in _HEADER_WORDS or c in {"ativo", "symbol", "símbolo", "simbolo"})
+    return hits >= 3
+
+
+def _valid_text_value(key: str, value: str) -> bool:
+    text = (value or "").strip()
+    if not text:
+        return False
+    canon = _canon_label(text)
+    if canon in _HEADER_WORDS or canon in {"ativo", "ativos", "tipo", "type"}:
+        return False
+    if key == "symbol" and text.isdigit():
+        return False
+    return True
+
+
 def _assign_metric(summary: dict, key: str, raw: str) -> None:
     text = (raw or "").strip()
-    if key in {"symbol", "period", "expert"}:
-        summary[key] = text
+    if key in _TEXT_KEYS:
+        if _valid_text_value(key, text):
+            summary[key] = text
         return
 
     money_pct = _MONEY_PCT_RE.search(text)
@@ -267,53 +311,72 @@ def _assign_metric(summary: dict, key: str, raw: str) -> None:
     summary[key] = text
 
 
+_COL_ALIASES = {
+    "time": "time",
+    "hora": "time",
+    "horário": "time",
+    "horario": "time",
+    "horário da abertura": "time",
+    "horario da abertura": "time",
+    "type": "type",
+    "tipo": "type",
+    "deal": "deal",
+    "oferta": "deal",
+    "negócio": "deal",
+    "negocio": "deal",
+    "order": "order",
+    "ordem": "order",
+    "size": "volume",
+    "volume": "volume",
+    "price": "price",
+    "preço": "price",
+    "preco": "price",
+    "profit": "profit",
+    "lucro": "profit",
+    "commission": "commission",
+    "comissao": "commission",
+    "comissão": "commission",
+    "swap": "swap",
+    "symbol": "symbol",
+    "símbolo": "symbol",
+    "simbolo": "symbol",
+    "ativo": "symbol",
+    "comment": "comment",
+    "comentário": "comment",
+    "comentario": "comment",
+    "direction": "entry",
+    "direção": "entry",
+    "direcao": "entry",
+    "entry": "entry",
+    "ticket": "ticket",
+    "estado": "state",
+}
+
+
 def _header_map(row: list[str]) -> dict[int, str] | None:
     normalized = [_canon_label(c) for c in row]
     joined = " ".join(normalized)
-    interesting = {"time", "type", "deal", "order", "price", "profit", "volume", "size", "symbol"}
+    interesting = {"time", "type", "deal", "order", "price", "profit", "volume", "size", "symbol", "tipo", "horário", "horario"}
     if not any(cell in interesting or cell.startswith("buy") for cell in normalized) and "time" not in joined:
         return None
     mapping: dict[int, str] = {}
-    aliases = {
-        "time": "time",
-        "hora": "time",
-        "type": "type",
-        "tipo": "type",
-        "deal": "deal",
-        "negócio": "deal",
-        "negocio": "deal",
-        "order": "order",
-        "ordem": "order",
-        "size": "volume",
-        "volume": "volume",
-        "price": "price",
-        "preço": "price",
-        "preco": "price",
-        "profit": "profit",
-        "lucro": "profit",
-        "commission": "commission",
-        "comissao": "commission",
-        "comissão": "commission",
-        "swap": "swap",
-        "symbol": "symbol",
-        "símbolo": "symbol",
-        "comment": "comment",
-        "direction": "entry",
-        "entry": "entry",
-        "ticket": "ticket",
-    }
     for i, cell in enumerate(normalized):
-        if cell in aliases:
-            mapping[i] = aliases[cell]
+        if cell in _COL_ALIASES:
+            mapping[i] = _COL_ALIASES[cell]
     return mapping or None
+
+
+def _row_to_mapped(row: list[str], header: dict[int, str]) -> dict:
+    item = {"cols": row}
+    for idx, key in header.items():
+        if idx < len(row):
+            item[key] = row[idx].strip()
+    return item
 
 
 def _row_to_trade(row: list[str], header: dict[int, str] | None) -> dict | None:
     if header:
-        item = {"cols": row}
-        for idx, key in header.items():
-            if idx < len(row):
-                item[key] = row[idx].strip()
+        item = _row_to_mapped(row, header)
         if any(item.get(k) for k in ("type", "deal", "order", "profit", "price")):
             return item
         return None
@@ -334,11 +397,51 @@ def _row_to_trade(row: list[str], header: dict[int, str] | None) -> dict | None:
     return None
 
 
+def pair_in_out_deals(deals: list[dict]) -> list[dict]:
+    """Pair tester deal rows (entry=in/out) into closed trades."""
+    open_deals: list[dict] = []
+    closed: list[dict] = []
+    for deal in deals:
+        kind = str(deal.get("type") or "").strip().lower()
+        if kind == "balance" or not kind:
+            continue
+        entry = str(deal.get("entry") or "").strip().lower()
+        if entry in {"in", "1", "deal_entry_in"}:
+            open_deals.append(deal)
+            continue
+        if entry in {"out", "2", "deal_entry_out", "inout", "out_by"} and open_deals:
+            opened = open_deals.pop(0)
+            side = opened.get("type") or opened.get("side") or "buy"
+            closed.append({
+                "ticket": opened.get("deal") or opened.get("order") or opened.get("ticket"),
+                "symbol": opened.get("symbol") or deal.get("symbol"),
+                "side": str(side).lower(),
+                "entry_time": opened.get("time"),
+                "entry_price": parse_number(opened.get("price")),
+                "exit_time": deal.get("time"),
+                "exit_price": parse_number(deal.get("price")),
+                "volume": parse_number(opened.get("volume")),
+                "profit": parse_number(deal.get("profit")),
+                "commission": _sum_optional(opened.get("commission"), deal.get("commission")),
+                "swap": _sum_optional(opened.get("swap"), deal.get("swap")),
+                "reason": deal.get("comment") or deal.get("reason") or "",
+            })
+    return closed
+
+
+def _sum_optional(left, right) -> float | None:
+    a, b = parse_number(left), parse_number(right)
+    if a is None and b is None:
+        return None
+    return round((a or 0.0) + (b or 0.0), 8)
+
+
 def parse_tester_report(html: str) -> dict:
     """Structured parse of an MT5 tester HTML report.
 
-    Numeric summary fields are converted to int/float. Trade rows are mapped
-    when a deals/orders table is present.
+    Numeric summary fields are converted to int/float. The Deals table
+    (Transações) is preferred for closed trades; order rows stay as raw
+    ``trades``. Table headers never overwrite Configuração fields.
     """
     parser = _ReportParser()
     parser.feed(html)
@@ -346,6 +449,8 @@ def parse_tester_report(html: str) -> dict:
 
     summary: dict = {}
     for row in rows:
+        if _is_header_row(row):
+            continue
         if len(row) >= 2:
             key = _lookup_label(row[0])
             if key:
@@ -362,23 +467,46 @@ def parse_tester_report(html: str) -> dict:
         summary["balance_drawdown_max"] = summary["balance_drawdown"]
     if summary.get("equity_drawdown") is not None:
         summary["equity_drawdown_max"] = summary["equity_drawdown"]
+    if summary.get("max_drawdown") is None and summary.get("equity_drawdown") is not None:
+        summary["max_drawdown"] = summary["equity_drawdown"]
+        if summary.get("equity_drawdown_pct") is not None:
+            summary["max_drawdown_pct"] = summary["equity_drawdown_pct"]
 
     trade_rows: list[dict] = []
+    deals: list[dict] = []
     header: dict[int, str] | None = None
+    in_deals = False
     for row in rows:
+        labels = [_canon_label(c) for c in row]
+        if labels == ["transações"] or labels == ["transacoes"] or labels == ["deals"]:
+            in_deals = True
+            header = None
+            continue
+        if labels == ["ordens"] or labels == ["orders"]:
+            in_deals = False
+            header = None
+            continue
         maybe_header = _header_map(row)
         if maybe_header and ("time" in maybe_header.values() or "type" in maybe_header.values()):
             header = maybe_header
+            in_deals = in_deals or "entry" in maybe_header.values()
             continue
         item = _row_to_trade(row, header)
-        if item:
-            trade_rows.append(item)
+        if not item:
+            continue
+        trade_rows.append(item)
+        if in_deals or item.get("entry") in {"in", "out", "inout"}:
+            if str(item.get("type") or "").lower() != "balance":
+                deals.append(item)
 
+    closed = pair_in_out_deals(deals)
     return {
         "summary": summary,
         "trade_rows_detected": len(trade_rows),
         "trades_sample": trade_rows[:5],
         "trades": trade_rows,
+        "deals": deals,
+        "closed_trades": closed,
     }
 
 

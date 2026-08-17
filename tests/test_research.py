@@ -381,6 +381,39 @@ def test_runner_preserves_failed_evidence(tmp_path: Path):
     assert read_manifest(store, result["run_id"])["status"] == "failed"
 
 
+def test_parse_real_acceptance_report():
+    path = Path(__file__).resolve().parents[1] / "research" / "acceptance" / "mcp_BBAS3_D1_20240101_20240816.htm"
+    if not path.exists():
+        pytest.skip("acceptance report not in tree")
+    from mcp_mt5.parsers import parse_tester_report, read_text_auto
+    from mcp_mt5.research.metrics import normalize_metrics
+
+    parsed = parse_tester_report(read_text_auto(path))
+    s = parsed["summary"]
+    assert s["symbol"] == "BBAS3"
+    assert s["expert"] == "RSI2"
+    assert s["currency"] == "BRL"
+    assert s["leverage"] == "1:100"
+    assert s["net_profit"] == 455.0
+    assert s["total_trades"] == 13
+    assert s["win_rate"] == 84.62
+    assert s["profit_trades"] == 11
+    assert s["initial_deposit"] == 10000.0
+    closed = parsed["closed_trades"]
+    assert len(closed) == 13
+    assert closed[0]["entry_time"] == "2024.01.05 10:08:40"
+    assert closed[0]["entry_price"] == 23.53
+    assert closed[0]["exit_price"] == 23.98
+    assert closed[0]["profit"] == 45.0
+    assert closed[-1]["profit"] == 100.0
+    profits = [t["profit"] for t in closed]
+    assert profits == [45, 79, 97, 71, -54, 49, 3, 25, 8, 38, 12, -18, 100]
+    metrics = normalize_metrics(s, closed)
+    assert metrics["symbol"] == "BBAS3"
+    assert metrics["win_rate"] == 84.62
+    assert metrics["total_trades"] == 13
+
+
 def test_parse_deal_csv_pairs_positions():
     csv_text = """deal,position_id,symbol,type,entry,time,price,volume,profit,commission,swap,reason
 1,10,PETR4,buy,in,2015.01.02 00:00:00,10,100,0,0,0,open

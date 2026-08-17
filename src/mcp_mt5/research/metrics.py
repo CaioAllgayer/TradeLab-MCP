@@ -59,10 +59,16 @@ def normalize_metrics(summary: dict[str, Any], trades: list[dict] | None = None)
         metrics["equity_drawdown"] = summary["equity_drawdown_max"]
 
     if metrics.get("win_rate") is None and trades:
-        closed = [t for t in trades if t.get("profit") is not None]
+        closed = [
+            t for t in trades
+            if t.get("profit") is not None and (t.get("exit_time") or t.get("exit_price"))
+        ]
         if closed:
             wins = sum(1 for t in closed if float(t["profit"]) > 0)
             metrics["win_rate"] = round(100.0 * wins / len(closed), 4)
     if metrics.get("total_trades") is None and trades:
-        metrics["total_trades"] = len(trades)
+        closed = [t for t in trades if t.get("exit_time") or t.get("profit")]
+        metrics["total_trades"] = len(closed) if closed else len(trades)
+    if isinstance(metrics.get("symbol"), str) and metrics["symbol"].lower() in {"tipo", "type", "ativo"}:
+        metrics.pop("symbol", None)
     return metrics

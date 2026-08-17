@@ -395,6 +395,8 @@ def _collect_trades(layout: MT5Layout, run_id: str, run_dir: Path, parsed: dict,
             if path.resolve() != copied.resolve():
                 shutil.copy2(path, copied)
             return parse_trades_csv(read_text_auto(copied))
+    if parsed.get("closed_trades"):
+        return parsed["closed_trades"]
     html_trades = parsed.get("trades") or []
     return trades_from_html_rows(html_trades, symbol=symbol)
 
