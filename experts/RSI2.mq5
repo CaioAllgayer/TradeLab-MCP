@@ -6,7 +6,7 @@
 //+------------------------------------------------------------------+
 #property copyright "TradeLab-MCP"
 #property link      "https://github.com/CaioAllgayer/TradeLab-MCP"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -18,6 +18,7 @@ input double InpRSIExit        = 70.0;
 input int    InpAtrPeriod      = 20;
 input double InpAtrMult        = 3.0;        // SL = X * ATR; 0 = sem stop (não calcula risco)
 input int    InpMaxBars        = 9;          // sai após X barras; 0 = desliga
+input int    InpTrendPeriod    = 50;         // close > close[N]; limitado a 10–200
 input double InpRiskPct        = 1.0;        // % do equity em risco no stop
 input double InpLots           = 0.0;        // >0 fixo; 0 = dimensiona pelo risco
 input ulong  InpMagic          = 20260817;
@@ -26,6 +27,7 @@ input string InpResearchRunId  = "";
 CTrade trade;
 int    g_rsi = INVALID_HANDLE;
 int    g_atr = INVALID_HANDLE;
+int    g_trend_period = 50;
 
 double NormalizePrice(const double price)
 {
@@ -102,6 +104,18 @@ bool MaxBarsReached()
    return (iBarShift(_Symbol, PERIOD_CURRENT, opened, true) >= InpMaxBars);
 }
 
+bool TrendUp()
+{
+   double close[];
+   ArraySetAsSeries(close, true);
+   const int need = g_trend_period + 3;
+   if(CopyClose(_Symbol, PERIOD_CURRENT, 0, need, close) < need)
+      return false;
+   if(close[1] == 0.0 || close[1 + g_trend_period] == 0.0)
+      return false;
+   return (close[1] > close[1 + g_trend_period]);
+}
+
 double AtrValue()
 {
    double atr[];
@@ -156,6 +170,12 @@ double LotsForStop(const double stop_distance)
 
 int OnInit()
 {
+   g_trend_period = InpTrendPeriod;
+   if(g_trend_period < 10)
+      g_trend_period = 10;
+   if(g_trend_period > 200)
+      g_trend_period = 200;
+
    trade.SetExpertMagicNumber((int)InpMagic);
    trade.SetDeviationInPoints(20);
    g_rsi = iRSI(_Symbol, PERIOD_CURRENT, InpRSIPeriod, PRICE_CLOSE);
@@ -194,6 +214,8 @@ void OnTick()
       return;
 
    if(rsi[0] >= InpRSIBuy)
+      return;
+   if(!TrendUp())
       return;
 
    const double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
